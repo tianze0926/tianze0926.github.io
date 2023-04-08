@@ -25,21 +25,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: |
+            - cwd: ${{ github.job }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+          cache-dependency-path: ${{ github.job }}/pnpm-lock.yaml
       - name: Build
+        env:
+          NODE_OPTIONS: --max_old_space_size=8192
         working-directory: ${{ github.job }}
         run: |
-          docker run --rm -v $(pwd):/app ghcr.io/peaceiris/mdbook build /app
-          mv book ${{ github.job }}
+          pnpm run docs:build
+          cd src/.vuepress
+          mv dist ${{ github.job }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.job }}
-          path: ${{ github.job }}/${{ github.job }}
+          path: ${{ github.job }}/src/.vuepress/${{ github.job }}
   
   aggregate:
     runs-on: ubuntu-latest
     needs: [tcp-lab]
     steps:
-      # - run: mkdir _site
       - uses: actions/download-artifact@v3
         with:
           path: _site

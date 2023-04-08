@@ -1,9 +1,0 @@
-[book]
-authors = ["tianze0926"]
-language = "zh"
-multilingual = false
-src = "src"
-title = "TCP 实验报告"
-
-[output.html]
-mathjax-support = true
