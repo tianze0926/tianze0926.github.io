@@ -80,6 +80,23 @@ SEG.LEN 应当包含 SYN 和 FIN（ACK 则不在其中）^[https://www.rfc-edito
 [^window]: https://www.rfc-editor.org/rfc/rfc9293#section-3.1-6.16.1
 
 
+### Step 4. TCP 连接的终止
+
+- 我方发起终止
+    - CLOSE CALL，发送 FIN，进入 FIN-WAIT-1：`tcp_shutdown` 在 ESTABLISHED 阶段的处理 ^[https://www.rfc-editor.org/rfc/rfc9293#section-3.10.4-9]
+    - 在 FIN-WAIT-1 阶段有 2 种可能：
+        - 收到 FIN，2 种情况 ^[https://www.rfc-editor.org/rfc/rfc9293#section-3.10.7.4-2.8.2.2.2.3.1]：
+            - 未收到 ACK，进入 CLOSING
+            - 收到 ACK，直接进入 TIME-WAIT
+        - 只收到 ACK，进入 FIN-WAIT-2 ^[https://www.rfc-editor.org/rfc/rfc9293#section-3.10.7.4-2.5.2.2.2.4.1]
+            - 在 FIN-WAIT-2 阶段收到 FIN，进入 TIME-WAIT
+
+- 对方发起终止
+    - 收到 FIN，进入 CLOSE-WAIT
+    - CLOSE CALL，发送 FIN，进入 LAST-ACK：`tcp_shutdown` 在 CLOSE-WAIT 阶段的处理 ^[https://www.rfc-editor.org/rfc/rfc9293#section-3.10.4-14]
+    - 收到 ACK，进入 CLOSED：`if_others` 检查 ACK 时在 LAST-ACK 阶段的处理 ^[https://www.rfc-editor.org/rfc/rfc9293#section-3.10.7.4-2.5.2.2.2.8.1]
+
+
 ## 总结
 
 - 建议文档和代码中的 RFC 引用改成新发布的全汇总版 [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293)
